@@ -631,7 +631,7 @@ func (k *K8sutil) CreateClientMasterDeployment(deploymentType, baseImage string,
 							"name":      deploymentName,
 						},
 						Annotations: map[string]string{
-							"pod.beta.kubernetes.io/init-containers": "[ { \"name\": \"sysctl\", \"image\": \"busybox\", \"imagePullPolicy\": \"IfNotPresent\", \"command\": [\"sysctl\", \"-w\", \"vm.max_map_count=262144\"], \"securityContext\": { \"privileged\": true } }]",
+							"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
 						},
 					},
 					Spec: v1.PodSpec{
@@ -639,7 +639,6 @@ func (k *K8sutil) CreateClientMasterDeployment(deploymentType, baseImage string,
 							v1.Container{
 								Name: deploymentName,
 								SecurityContext: &v1.SecurityContext{
-									Privileged: &[]bool{true}[0],
 									Capabilities: &v1.Capabilities{
 										Add: []v1.Capability{
 											"IPC_LOCK",
@@ -827,7 +826,7 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 							"name":      statefulSetName,
 						},
 						Annotations: map[string]string{
-							"pod.beta.kubernetes.io/init-containers": "[ { \"name\": \"sysctl\", \"image\": \"busybox\", \"imagePullPolicy\": \"IfNotPresent\", \"command\": [\"sysctl\", \"-w\", \"vm.max_map_count=262144\"], \"securityContext\": { \"privileged\": true } }]",
+							"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
 						},
 					},
 					Spec: v1.PodSpec{
@@ -856,7 +855,6 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 							v1.Container{
 								Name: statefulSetName,
 								SecurityContext: &v1.SecurityContext{
-									Privileged: &[]bool{true}[0],
 									Capabilities: &v1.Capabilities{
 										Add: []v1.Capability{
 											"IPC_LOCK",

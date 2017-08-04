@@ -4,7 +4,7 @@
 .PHONY: all build container push clean test
 
 TAG ?= 0.0.6
-PREFIX ?= upmcenterprises
+PREFIX ?= gcr.io/openshift-rr-io
 
 all: container
 

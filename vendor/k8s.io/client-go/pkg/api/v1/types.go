@@ -2236,7 +2236,7 @@ const (
 	// This annotation key will be used to contain an array of v1 JSON encoded Containers
 	// for init containers. The annotation will be placed into the internal type and cleared.
 	// This key is only recognized by version >= 1.4.
-	PodInitContainersBetaAnnotationKey = "pod.beta.kubernetes.io/init-containers"
+	PodInitContainersBetaAnnotationKey = "security.alpha.kubernetes.io/sysctls"
 	// This annotation key will be used to contain an array of v1 JSON encoded Containers
 	// for init containers. The annotation will be placed into the internal type and cleared.
 	// This key is recognized by version >= 1.3. For version 1.4 code, this key
