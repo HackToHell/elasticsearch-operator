@@ -79,7 +79,10 @@ type ClusterSpec struct {
 	ImagePullSecrets []ImagePullSecrets `json:"image-pull-secrets"`
 
 	// Resources defines memory / cpu constraints
-	Resources Resources `json:"resources"`
+	MasterNodeResources Resources `json:"master-node-resources"`
+
+	//Resources for the Data node
+	DataNodeResources Resources `json:"data-node-resources"`
 
 	// Instrumentation defines metrics for the cluster
 	Instrumentation Instrumentation `json:"instrumentation"`
@@ -89,6 +92,9 @@ type ClusterSpec struct {
 
 	//NodePort
 	NodePort int32 `json:"nodePort"`
+
+	//ServiceAccount name
+	ServiceAccount string `json:"serviceaccount"`
 
 	Scheduler *snapshot.Scheduler
 }

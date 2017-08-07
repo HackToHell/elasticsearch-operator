@@ -642,6 +642,7 @@ func (k *K8sutil) CreateClientMasterDeployment(deploymentType, baseImage string,
 									Capabilities: &v1.Capabilities{
 										Add: []v1.Capability{
 											"IPC_LOCK",
+											"SYS_RESOURCE",
 										},
 									},
 								},
@@ -785,7 +786,7 @@ func TemplateImagePullSecrets(ips []myspec.ImagePullSecrets) []v1.LocalObjectRef
 
 // CreateDataNodeDeployment creates the data node deployment
 func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageClass string, dataDiskSize string, resources myspec.Resources,
-	imagePullSecrets []myspec.ImagePullSecrets, clusterName, statsdEndpoint, networkHost, namespace string) error {
+	imagePullSecrets []myspec.ImagePullSecrets, clusterName, statsdEndpoint, networkHost, namespace string, serviceAccount string) error {
 
 	fullDataDeploymentName := fmt.Sprintf("%s-%s", dataDeploymentName, clusterName)
 	component := fmt.Sprintf("elasticsearch-%s", clusterName)
@@ -799,8 +800,8 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 		volumeSize, _ := resource.ParseQuantity(dataDiskSize)
 
 		// Parse CPU / Memory
-		// limitCPU, _ := resource.ParseQuantity(resources.Limits.CPU)
-		// limitMemory, _ := resource.ParseQuantity(resources.Limits.Memory)
+		limitCPU, _ := resource.ParseQuantity(resources.Limits.CPU)
+		limitMemory, _ := resource.ParseQuantity(resources.Limits.Memory)
 		requestCPU, _ := resource.ParseQuantity(resources.Requests.CPU)
 		requestMemory, _ := resource.ParseQuantity(resources.Requests.Memory)
 
@@ -830,6 +831,7 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 						},
 					},
 					Spec: v1.PodSpec{
+						ServiceAccountName: serviceAccount,
 						Affinity: &v1.Affinity{
 							PodAntiAffinity: &v1.PodAntiAffinity{
 								PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
@@ -919,10 +921,10 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 									},
 								},
 								Resources: v1.ResourceRequirements{
-									// Limits: v1.ResourceList{
-									// 	"cpu":    limitCPU,
-									// 	"memory": limitMemory,
-									// },
+									Limits: v1.ResourceList{
+										"cpu":    limitCPU,
+										"memory": limitMemory,
+									},
 									Requests: v1.ResourceList{
 										"cpu":    requestCPU,
 										"memory": requestMemory,
