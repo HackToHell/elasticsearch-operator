@@ -142,7 +142,8 @@ func (p *Processor) refreshClusters() error {
 				Zones:              cluster.Spec.Zones,
 				DataDiskSize:       cluster.Spec.DataDiskSize,
 				ElasticSearchImage: cluster.Spec.ElasticSearchImage,
-				JavaOptions:        cluster.Spec.JavaOptions,
+				MasterJavaOptions: cluster.Spec.MasterJavaOptions,
+				DataJavaOptions: cluster.Spec.DataJavaOptions,
 				NetworkHost:        cluster.Spec.NetworkHost,
 				Snapshot: myspec.Snapshot{
 					SchedulerEnabled: cluster.Spec.Snapshot.SchedulerEnabled,
@@ -240,9 +241,9 @@ func (p *Processor) processElasticSearchCluster(c *myspec.ElasticsearchCluster) 
 	p.k8sclient.CreateDataService(c.ObjectMeta.Name, c.ObjectMeta.Namespace)
 	p.k8sclient.CreateClientService(c.ObjectMeta.Name, c.ObjectMeta.Namespace, c.Spec.NodePort)
 
-	p.k8sclient.CreateClientMasterDeployment("client", baseImage, &c.Spec.ClientNodeReplicas, c.Spec.JavaOptions,
+	p.k8sclient.CreateClientMasterDeployment("client", baseImage, &c.Spec.ClientNodeReplicas, c.Spec.MasterJavaOptions,
 		c.Spec.MasterNodeResources, c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace)
-	p.k8sclient.CreateClientMasterDeployment("master", baseImage, &c.Spec.MasterNodeReplicas, c.Spec.JavaOptions,
+	p.k8sclient.CreateClientMasterDeployment("master", baseImage, &c.Spec.MasterNodeReplicas, c.Spec.MasterJavaOptions,
 		c.Spec.DataNodeResources, c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace)
 
 	zoneCount := 0
@@ -258,14 +259,14 @@ func (p *Processor) processElasticSearchCluster(c *myspec.ElasticsearchCluster) 
 
 		for index, count := range zoneDistribution {
 			p.k8sclient.CreateDataNodeDeployment(&count, baseImage, c.Spec.Zones[index], c.Spec.DataDiskSize, c.Spec.DataNodeResources,
-				c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace, c.Spec.ServiceAccount)
+				c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace, c.Spec.ServiceAccount, c.Spec.DataJavaOptions)
 		}
 	} else {
 		// No zones defined, rely on current provisioning logic which may break. Other strategy is to use emptyDir?
 		// NOTE: Issue with dynamic PV provisioning (https://github.com/kubernetes/kubernetes/issues/34583)
 		p.k8sclient.CreateStorageClass("standard", c.Spec.Storage.StorageClassProvisoner, c.Spec.Storage.StorageType, c.ObjectMeta.Name)
 		p.k8sclient.CreateDataNodeDeployment(func() *int32 { i := int32(c.Spec.DataNodeReplicas); return &i }(), baseImage, "standard",
-			c.Spec.DataDiskSize, c.Spec.DataNodeResources, c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace, c.Spec.ServiceAccount)
+			c.Spec.DataDiskSize, c.Spec.DataNodeResources, c.Spec.ImagePullSecrets, c.ObjectMeta.Name, c.Spec.Instrumentation.StatsdHost, c.Spec.NetworkHost, c.ObjectMeta.Namespace, c.Spec.ServiceAccount, c.Spec.DataJavaOptions)
 	}
 
 	// Setup CronSchedule

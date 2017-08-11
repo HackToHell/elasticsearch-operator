@@ -73,7 +73,10 @@ type ClusterSpec struct {
 	Storage Storage `json:"storage"`
 
 	// JavaOptions defines args passed to elastic nodes
-	JavaOptions string `json:"java-options"`
+	MasterJavaOptions string `json:"master-java-options"`
+
+	//JavaOptions for the data nodes
+	DataJavaOptions string `json:"data-java-options"`
 
 	// ImagePullSecrets defines credentials to pull image from private repository (optional)
 	ImagePullSecrets []ImagePullSecrets `json:"image-pull-secrets"`

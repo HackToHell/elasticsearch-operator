@@ -630,9 +630,9 @@ func (k *K8sutil) CreateClientMasterDeployment(deploymentType, baseImage string,
 							"role":      role,
 							"name":      deploymentName,
 						},
-						Annotations: map[string]string{
-							"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
-						},
+						//Annotations: map[string]string{
+						//	"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
+						//},
 					},
 					Spec: v1.PodSpec{
 						Containers: []v1.Container{
@@ -786,7 +786,7 @@ func TemplateImagePullSecrets(ips []myspec.ImagePullSecrets) []v1.LocalObjectRef
 
 // CreateDataNodeDeployment creates the data node deployment
 func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageClass string, dataDiskSize string, resources myspec.Resources,
-	imagePullSecrets []myspec.ImagePullSecrets, clusterName, statsdEndpoint, networkHost, namespace string, serviceAccount string) error {
+	imagePullSecrets []myspec.ImagePullSecrets, clusterName, statsdEndpoint, networkHost, namespace string, serviceAccount string, javaOptions string ) error {
 
 	fullDataDeploymentName := fmt.Sprintf("%s-%s", dataDeploymentName, clusterName)
 	component := fmt.Sprintf("elasticsearch-%s", clusterName)
@@ -826,12 +826,12 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 							"role":      "data",
 							"name":      statefulSetName,
 						},
-						Annotations: map[string]string{
-							"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
-						},
+						//Annotations: map[string]string{
+						//	"security.alpha.kubernetes.io/sysctls": "vm.max_map_count=262144",
+						//},
 					},
 					Spec: v1.PodSpec{
-						ServiceAccountName: serviceAccount,
+						//ServiceAccountName: serviceAccount,
 						Affinity: &v1.Affinity{
 							PodAntiAffinity: &v1.PodAntiAffinity{
 								PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
@@ -888,7 +888,7 @@ func (k *K8sutil) CreateDataNodeDeployment(replicas *int32, baseImage, storageCl
 									},
 									v1.EnvVar{
 										Name:  "ES_JAVA_OPTS",
-										Value: "-Xms1024m -Xmx1024m",
+										Value: javaOptions,
 									},
 									v1.EnvVar{
 										Name:  "STATSD_HOST",
